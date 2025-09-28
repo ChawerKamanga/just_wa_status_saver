@@ -87,6 +87,7 @@ class _FeedScreenContentState extends State<_FeedScreenContent>
           unselectedLabelColor: AppColors.textSecondary,
           indicatorColor: AppColors.primary,
           indicatorWeight: 3,
+          dividerColor: Colors.transparent,
           labelStyle: AppTextStyles.titleSmall.copyWith(
             fontWeight: FontWeight.w600,
           ),
