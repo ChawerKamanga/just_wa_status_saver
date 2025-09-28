@@ -198,7 +198,7 @@ class SettingsScreen extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      'Version 1.0.0',
+                      'Version 0.1.0',
                       style: AppTextStyles.bodySmall.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
