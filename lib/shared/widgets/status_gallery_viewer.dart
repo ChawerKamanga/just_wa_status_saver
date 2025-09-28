@@ -240,40 +240,67 @@ class _StatusGalleryViewerState extends State<StatusGalleryViewer> {
     try {
       final status = widget.allStatuses[_currentIndex];
 
-      // Request storage permission
-      final permission = await Permission.storage.request();
-      if (!permission.isGranted) {
-        _showSnackBar('Storage permission denied', Colors.red);
+      // Request proper permissions for Android 11+
+      bool hasPermission = false;
+
+      if (Platform.isAndroid) {
+        // Try MANAGE_EXTERNAL_STORAGE first (for Android 11+)
+        final managePermission = await Permission.manageExternalStorage
+            .request();
+        if (managePermission.isGranted) {
+          hasPermission = true;
+        } else {
+          // Fallback to regular storage permission
+          final storagePermission = await Permission.storage.request();
+          hasPermission = storagePermission.isGranted;
+        }
+      } else {
+        hasPermission =
+            true; // iOS doesn't need storage permissions for app documents
+      }
+
+      if (!hasPermission) {
+        _showSnackBar(
+          'Storage permission denied. Please grant permission in Settings.',
+          Colors.red,
+        );
         return;
       }
 
       // Get the downloads directory
       Directory? downloadsDirectory;
       if (Platform.isAndroid) {
-        downloadsDirectory = Directory(
-          '/storage/emulated/0/Download/just_status_saver',
-        );
+        // Save directly to Downloads folder (visible to user)
+        downloadsDirectory = Directory('/storage/emulated/0/Download');
       } else {
+        // For iOS, use Documents directory
         final appDir = await getApplicationDocumentsDirectory();
-        downloadsDirectory = Directory('${appDir.path}/just_status_saver');
+        downloadsDirectory = Directory('${appDir.path}/Downloads');
       }
 
-      // Create directory if it doesn't exist
+      // Ensure directory exists (Downloads folder should already exist on Android)
       if (!await downloadsDirectory.exists()) {
         await downloadsDirectory.create(recursive: true);
       }
 
-      // Generate unique filename
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      // Generate meaningful filename with timestamp
+      final timestamp = DateTime.now();
+      final dateStr =
+          '${timestamp.year}${timestamp.month.toString().padLeft(2, '0')}${timestamp.day.toString().padLeft(2, '0')}';
+      final timeStr =
+          '${timestamp.hour.toString().padLeft(2, '0')}${timestamp.minute.toString().padLeft(2, '0')}${timestamp.second.toString().padLeft(2, '0')}';
       final extension = status.name.split('.').last;
-      final fileName = 'status_${timestamp}.$extension';
+      final fileName = 'WA_Status_${dateStr}_$timeStr.$extension';
       final destinationPath = '${downloadsDirectory.path}/$fileName';
 
       // Copy file
       final sourceFile = File(status.filePath);
       await sourceFile.copy(destinationPath);
 
-      _showSnackBar('Downloaded to just_status_saver folder', Colors.green);
+      _showSnackBar(
+        'Downloaded to Downloads folder as $fileName',
+        Colors.green,
+      );
     } catch (e) {
       _showSnackBar('Download failed: $e', Colors.red);
     } finally {

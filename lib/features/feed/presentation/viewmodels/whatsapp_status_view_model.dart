@@ -91,6 +91,15 @@ class WhatsAppStatusViewModel extends ChangeNotifier {
   }
 
   Future<void> refreshStatuses() async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    // Clear existing data first
+    _allStatuses.clear();
+    _imageStatuses.clear();
+    _videoStatuses.clear();
+
     await loadStatuses();
   }
 

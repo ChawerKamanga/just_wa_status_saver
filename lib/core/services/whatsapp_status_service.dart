@@ -31,24 +31,52 @@ class WhatsAppStatusService {
     try {
       final List<WhatsAppStatus> allStatuses = [];
 
+      print('🔍 Starting WhatsApp status file discovery...');
+
       // Get status files from regular WhatsApp
       final whatsappStatuses = await _getStatusFilesFromPath(
         _whatsappStatusPath,
       );
+      print('📱 Regular WhatsApp found ${whatsappStatuses.length} files');
       allStatuses.addAll(whatsappStatuses);
 
       // Get status files from WhatsApp Business
       final businessStatuses = await _getStatusFilesFromPath(
         _whatsappBusinessStatusPath,
       );
+      print('💼 WhatsApp Business found ${businessStatuses.length} files');
       allStatuses.addAll(businessStatuses);
 
-      // Sort by date modified (newest first)
-      allStatuses.sort((a, b) => b.dateModified.compareTo(a.dateModified));
+      // Remove duplicates based on multiple criteria (file name, size, and path)
+      final uniqueStatuses = <String, WhatsAppStatus>{};
+      for (final status in allStatuses) {
+        // Create a unique key based on file name, size, and modification date
+        final uniqueKey =
+            '${status.name}_${status.fileSize}_${status.dateModified.millisecondsSinceEpoch}';
 
-      return allStatuses;
+        // Only add if not already present, or if this path is more canonical
+        if (!uniqueStatuses.containsKey(uniqueKey)) {
+          uniqueStatuses[uniqueKey] = status;
+        } else {
+          // Keep the one with the most canonical path (prefer /storage/emulated/0)
+          final existing = uniqueStatuses[uniqueKey]!;
+          if (status.filePath.contains('/storage/emulated/0') &&
+              !existing.filePath.contains('/storage/emulated/0')) {
+            uniqueStatuses[uniqueKey] = status;
+          }
+        }
+      }
+
+      // Convert back to list and sort by date modified (newest first)
+      final finalStatuses = uniqueStatuses.values.toList();
+      finalStatuses.sort((a, b) => b.dateModified.compareTo(a.dateModified));
+
+      print(
+        '✅ Total unique status files found: ${finalStatuses.length} (from ${allStatuses.length} total)',
+      );
+      return finalStatuses;
     } catch (e) {
-      print('Error getting all status files: $e');
+      print('❌ Error getting all status files: $e');
       return [];
     }
   }
@@ -85,30 +113,72 @@ class WhatsAppStatusService {
   ) async {
     try {
       final List<WhatsAppStatus> statuses = [];
+      final Set<String> processedDirectories = {};
 
       // Try to get external storage paths
       final externalPaths = await _getExternalStoragePaths();
+      print('🔍 Checking paths: $externalPaths');
 
       for (final externalPath in externalPaths) {
         final statusDir = Directory('$externalPath/$relativePath');
+        final canonicalPath = statusDir.path;
+
+        // Skip if we've already processed this directory
+        if (processedDirectories.contains(canonicalPath)) {
+          print('⏭️ Skipping already processed directory: $canonicalPath');
+          continue;
+        }
+
+        processedDirectories.add(canonicalPath);
+        print('📂 Checking directory: $canonicalPath');
 
         if (await statusDir.exists()) {
-          final files = await statusDir.list().toList();
+          print('✅ Directory exists, listing files...');
+          try {
+            final files = await statusDir
+                .list(recursive: false, followLinks: false)
+                .where((entity) => entity is File)
+                .cast<File>()
+                .toList();
 
-          for (final file in files) {
-            if (file is File) {
-              final status = await _createWhatsAppStatusFromFile(file);
-              if (status != null) {
-                statuses.add(status);
+            print('📄 Found ${files.length} files in directory');
+
+            for (final file in files) {
+              try {
+                final status = await _createWhatsAppStatusFromFile(file);
+                if (status != null) {
+                  // Check for duplicates by file name and size before adding
+                  final isDuplicate = statuses.any(
+                    (existing) =>
+                        existing.name == status.name &&
+                        existing.fileSize == status.fileSize,
+                  );
+
+                  if (!isDuplicate) {
+                    statuses.add(status);
+                    print('✅ Added file: ${status.name}');
+                  } else {
+                    print('🔄 Skipped duplicate file: ${status.name}');
+                  }
+                } else {
+                  print('❌ Skipped file: ${file.path}');
+                }
+              } catch (e) {
+                print('❌ Error processing file ${file.path}: $e');
               }
             }
+          } catch (e) {
+            print('❌ Error listing files in $canonicalPath: $e');
           }
+        } else {
+          print('❌ Directory does not exist: $canonicalPath');
         }
       }
 
+      print('📊 Total files found in $relativePath: ${statuses.length}');
       return statuses;
     } catch (e) {
-      print('Error getting status files from path $relativePath: $e');
+      print('❌ Error getting status files from path $relativePath: $e');
       return [];
     }
   }
@@ -116,9 +186,9 @@ class WhatsAppStatusService {
   /// Get external storage paths
   static Future<List<String>> _getExternalStoragePaths() async {
     try {
-      final List<String> paths = [];
+      final Set<String> paths = {};
 
-      // Try to get external storage path using external_path package
+      // Method 1: Try to get external storage path using external_path package
       try {
         final externalPath =
             await ExternalPath.getExternalStoragePublicDirectory(
@@ -136,27 +206,24 @@ class WhatsAppStatusService {
           }
         }
       } catch (e) {
-        print('Error getting external path: $e');
+        print('❌ Error getting external path: $e');
       }
 
-      // Fallback: try common Android external storage paths
-      if (paths.isEmpty) {
-        final commonPaths = [
-          '/storage/emulated/0',
-          '/sdcard',
-          '/storage/sdcard0',
-        ];
+      // Method 2: Add common Android storage paths
+      final commonPaths = [
+        '/storage/emulated/0',
+        '/storage/self/primary',
+        '/sdcard',
+      ];
 
-        for (final path in commonPaths) {
-          final dir = Directory(path);
-          if (await dir.exists()) {
-            paths.add(path);
-            break;
-          }
+      for (final path in commonPaths) {
+        final dir = Directory(path);
+        if (await dir.exists()) {
+          paths.add(path);
         }
       }
 
-      // Additional fallback using path_provider
+      // Additional fallback using path_provider if no paths found
       if (paths.isEmpty) {
         try {
           final directory = await getExternalStorageDirectory();
@@ -172,11 +239,12 @@ class WhatsAppStatusService {
             }
           }
         } catch (e) {
-          print('Error using path_provider fallback: $e');
+          print('❌ Error using path_provider fallback: $e');
         }
       }
 
-      return paths;
+      print('🗂️ Available storage paths: ${paths.toList()}');
+      return paths.toList();
     } catch (e) {
       print('Error getting external storage paths: $e');
       return [];
@@ -220,45 +288,45 @@ class WhatsAppStatusService {
         _videoExtensions.contains(lowercaseExt);
   }
 
-  /// Save status file to device gallery/downloads
+  /// Save status file to device Downloads folder
   static Future<bool> saveStatusFile(WhatsAppStatus status) async {
     try {
-      // Get downloads directory
+      // Get downloads directory - use direct path for Android
       Directory? downloadsDir;
 
-      try {
-        downloadsDir = await getDownloadsDirectory();
-      } catch (e) {
-        // Fallback to external storage
-        final externalDir = await getExternalStorageDirectory();
-        if (externalDir != null) {
-          downloadsDir = Directory(
-            '${externalDir.parent.parent.parent.parent.path}/Download',
-          );
-        }
+      if (Platform.isAndroid) {
+        // Direct path to Downloads folder (visible to user)
+        downloadsDir = Directory('/storage/emulated/0/Download');
+      } else {
+        // For iOS, use Documents directory
+        final appDir = await getApplicationDocumentsDirectory();
+        downloadsDir = Directory('${appDir.path}/Downloads');
       }
 
-      if (downloadsDir == null) {
-        print('Could not access downloads directory');
-        return false;
+      // Ensure directory exists
+      if (!await downloadsDir.exists()) {
+        await downloadsDir.create(recursive: true);
       }
 
-      // Create destination directory if it doesn't exist
-      final destDir = Directory('${downloadsDir.path}/WhatsApp Status');
-      if (!await destDir.exists()) {
-        await destDir.create(recursive: true);
-      }
+      // Generate meaningful filename with timestamp
+      final timestamp = DateTime.now();
+      final dateStr =
+          '${timestamp.year}${timestamp.month.toString().padLeft(2, '0')}${timestamp.day.toString().padLeft(2, '0')}';
+      final timeStr =
+          '${timestamp.hour.toString().padLeft(2, '0')}${timestamp.minute.toString().padLeft(2, '0')}${timestamp.second.toString().padLeft(2, '0')}';
+      final extension = status.name.split('.').last;
+      final fileName = 'WA_Status_${dateStr}_$timeStr.$extension';
 
       // Copy file to destination
       final sourceFile = File(status.filePath);
-      final destFile = File('${destDir.path}/${status.name}');
+      final destFile = File('${downloadsDir.path}/$fileName');
 
       await sourceFile.copy(destFile.path);
-      print('File saved to: ${destFile.path}');
+      print('✅ File saved to Downloads: $fileName');
 
       return true;
     } catch (e) {
-      print('Error saving status file: $e');
+      print('❌ Error saving status file: $e');
       return false;
     }
   }

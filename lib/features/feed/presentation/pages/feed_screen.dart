@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
 import '../../../../core/constants/app_strings.dart';
@@ -70,12 +71,36 @@ class _FeedScreenContentState extends State<_FeedScreenContent>
           ),
         ),
         actions: [
+          Consumer<WhatsAppStatusViewModel>(
+            builder: (context, viewModel, _) => IconButton(
+              icon: viewModel.isLoading
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          AppColors.primary,
+                        ),
+                      ),
+                    )
+                  : const Icon(Icons.refresh, color: AppColors.textPrimary),
+              onPressed: viewModel.isLoading
+                  ? null
+                  : () async {
+                      await viewModel.refreshStatuses();
+                    },
+              tooltip: 'Refresh statuses',
+            ),
+          ),
           IconButton(
             icon: const Icon(
               Icons.settings_outlined,
               color: AppColors.textPrimary,
             ),
-            onPressed: () {},
+            onPressed: () {
+              context.go('/settings');
+            },
           ),
           const SizedBox(width: AppDimensions.spacing8),
         ],
@@ -310,7 +335,7 @@ class _FeedScreenContentState extends State<_FeedScreenContent>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              '${status.type == StatusType.video ? 'Video' : 'Image'} saved successfully!',
+              '${status.type == StatusType.video ? 'Video' : 'Image'} saved to Downloads folder!',
             ),
             backgroundColor: Colors.green,
           ),
