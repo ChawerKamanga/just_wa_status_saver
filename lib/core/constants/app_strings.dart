@@ -11,11 +11,8 @@ class AppStrings {
   static const String tabDesign = 'Design';
 
   // Navigation
-  static const String navHome = 'Home';
-  static const String navSearch = 'Search';
-  static const String navAdd = 'Add';
-  static const String navMessages = 'Messages';
-  static const String navProfile = 'Profile';
+  static const String navStatus = 'Status';
+  static const String navSaved = 'Saved';
 
   // Content
   static const String sampleTitle1 = 'Payday – Online Banking Website';

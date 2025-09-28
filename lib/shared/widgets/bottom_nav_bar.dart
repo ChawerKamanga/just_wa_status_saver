@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_dimensions.dart';
+import '../../core/constants/app_strings.dart';
 import '../../core/navigation/app_router.dart';
 
 class BottomNavBar extends StatelessWidget {
@@ -12,19 +13,10 @@ class BottomNavBar extends StatelessWidget {
   void _onItemTapped(BuildContext context, int index) {
     switch (index) {
       case 0:
-        context.go(AppRouter.home);
+        context.go(AppRouter.home); // Status page
         break;
       case 1:
-        context.go(AppRouter.search);
-        break;
-      case 2:
-        context.go(AppRouter.add);
-        break;
-      case 3:
-        context.go(AppRouter.messages);
-        break;
-      case 4:
-        context.go(AppRouter.profile);
+        context.go(AppRouter.saved); // Saved page
         break;
     }
   }
@@ -44,23 +36,27 @@ class BottomNavBar extends StatelessWidget {
       ),
       child: SafeArea(
         child: Container(
-          height: 80,
+          height: 70,
           padding: const EdgeInsets.symmetric(
-            horizontal: AppDimensions.spacing16,
+            horizontal: AppDimensions.spacing32,
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildNavItem(context, Icons.home_outlined, Icons.home_filled, 0),
-              _buildNavItem(context, Icons.search_outlined, Icons.search, 1),
-              _buildAddButton(context),
               _buildNavItem(
                 context,
-                Icons.chat_bubble_outline,
-                Icons.chat_bubble,
-                3,
+                Icons.photo_library_outlined,
+                Icons.photo_library,
+                0,
+                AppStrings.navStatus,
               ),
-              _buildNavItem(context, Icons.person_outline, Icons.person, 4),
+              _buildNavItem(
+                context,
+                Icons.bookmark_border,
+                Icons.bookmark,
+                1,
+                AppStrings.navSaved,
+              ),
             ],
           ),
         ),
@@ -73,6 +69,7 @@ class BottomNavBar extends StatelessWidget {
     IconData outlineIcon,
     IconData filledIcon,
     int index,
+    String label,
   ) {
     final isSelected = selectedIndex == index;
 
@@ -83,31 +80,24 @@ class BottomNavBar extends StatelessWidget {
           horizontal: AppDimensions.spacing12,
           vertical: AppDimensions.spacing8,
         ),
-        child: Icon(
-          isSelected ? filledIcon : outlineIcon,
-          color: isSelected ? AppColors.primary : AppColors.textSecondary,
-          size: AppDimensions.iconMedium,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAddButton(BuildContext context) {
-    return GestureDetector(
-      onTap: () => _onItemTapped(context, 2),
-      child: Container(
-        width: 48,
-        height: 48,
-        decoration: BoxDecoration(
-          color: selectedIndex == 2
-              ? AppColors.primary
-              : AppColors.textSecondary,
-          borderRadius: BorderRadius.circular(AppDimensions.radiusMedium),
-        ),
-        child: const Icon(
-          Icons.add,
-          color: AppColors.surface,
-          size: AppDimensions.iconMedium,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              isSelected ? filledIcon : outlineIcon,
+              color: isSelected ? AppColors.primary : AppColors.textSecondary,
+              size: AppDimensions.iconMedium,
+            ),
+            const SizedBox(height: AppDimensions.spacing4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: isSelected ? AppColors.primary : AppColors.textSecondary,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+              ),
+            ),
+          ],
         ),
       ),
     );

@@ -7,7 +7,6 @@ import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../data/models/post.dart';
 import '../../../../shared/widgets/app_scaffold.dart';
-import '../../../../shared/widgets/top_tab_bar.dart';
 import '../viewmodels/feed_view_model.dart';
 import '../widgets/banking_post_card.dart';
 import '../widgets/image_post_card.dart';
@@ -26,8 +25,34 @@ class FeedScreen extends StatelessWidget {
   }
 }
 
-class _FeedScreenContent extends StatelessWidget {
+class _FeedScreenContent extends StatefulWidget {
   const _FeedScreenContent();
+
+  @override
+  State<_FeedScreenContent> createState() => _FeedScreenContentState();
+}
+
+class _FeedScreenContentState extends State<_FeedScreenContent>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(() {
+      if (!_tabController.indexIsChanging) {
+        final viewModel = Provider.of<FeedViewModel>(context, listen: false);
+        viewModel.selectTab(_tabController.index);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,56 +70,71 @@ class _FeedScreenContent extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(
-              Icons.notifications_outlined,
+              Icons.settings_outlined,
               color: AppColors.textPrimary,
             ),
             onPressed: () {},
           ),
           const SizedBox(width: AppDimensions.spacing8),
         ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(AppDimensions.tabBarHeight),
-          child: Consumer<FeedViewModel>(
-            builder: (context, viewModel, _) {
-              return TopTabBar(
-                tabs: viewModel.tabs,
-                selectedIndex: viewModel.selectedTabIndex,
-                onTabSelected: viewModel.selectTab,
-              );
-            },
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: const [
+            Tab(text: 'Images'),
+            Tab(text: 'Videos'),
+          ],
+          labelColor: AppColors.primary,
+          unselectedLabelColor: AppColors.textSecondary,
+          indicatorColor: AppColors.primary,
+          indicatorWeight: 3,
+          labelStyle: AppTextStyles.titleSmall.copyWith(
+            fontWeight: FontWeight.w600,
           ),
+          unselectedLabelStyle: AppTextStyles.titleSmall,
         ),
       ),
-      body: Consumer<FeedViewModel>(
-        builder: (context, viewModel, _) {
-          if (viewModel.isLoading) {
-            return const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
-            );
-          }
-
-          return RefreshIndicator(
-            onRefresh: () async {
-              // Simulate refresh
-              await Future.delayed(const Duration(seconds: 1));
-              viewModel.selectTab(viewModel.selectedTabIndex);
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(AppDimensions.spacing16),
-              child: MasonryGridView.count(
-                crossAxisCount: 2,
-                crossAxisSpacing: AppDimensions.gridSpacing,
-                mainAxisSpacing: AppDimensions.gridSpacing,
-                itemCount: viewModel.posts.length,
-                itemBuilder: (context, index) {
-                  final post = viewModel.posts[index];
-                  return _buildPostCard(context, post, viewModel);
-                },
-              ),
-            ),
-          );
-        },
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          _buildTabContent(0), // Images tab
+          _buildTabContent(1), // Videos tab
+        ],
       ),
+    );
+  }
+
+  Widget _buildTabContent(int tabIndex) {
+    return Consumer<FeedViewModel>(
+      builder: (context, viewModel, _) {
+        // Get posts for the specific tab
+        final posts = viewModel.getSamplePostsForTab(tabIndex);
+
+        if (viewModel.isLoading) {
+          return const Center(
+            child: CircularProgressIndicator(color: AppColors.primary),
+          );
+        }
+
+        return RefreshIndicator(
+          onRefresh: () async {
+            await Future.delayed(const Duration(seconds: 1));
+            viewModel.selectTab(tabIndex);
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(AppDimensions.spacing16),
+            child: MasonryGridView.count(
+              crossAxisCount: 2,
+              crossAxisSpacing: AppDimensions.gridSpacing,
+              mainAxisSpacing: AppDimensions.gridSpacing,
+              itemCount: posts.length,
+              itemBuilder: (context, index) {
+                final post = posts[index];
+                return _buildPostCard(context, post, viewModel);
+              },
+            ),
+          ),
+        );
+      },
     );
   }
 

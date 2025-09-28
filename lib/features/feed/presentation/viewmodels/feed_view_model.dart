@@ -10,16 +10,7 @@ class FeedViewModel extends ChangeNotifier {
   List<Post> get posts => _posts;
   bool get isLoading => _isLoading;
 
-  final List<String> tabs = [
-    'For you',
-    'Web design',
-    'Life hacks websites',
-    'Book',
-    'Technology',
-    'Design',
-    'Photography',
-    'Art',
-  ];
+  final List<String> tabs = ['Images', 'Videos'];
 
   FeedViewModel() {
     _loadSampleData();
@@ -58,17 +49,17 @@ class FeedViewModel extends ChangeNotifier {
 
     // Simulate network delay
     Future.delayed(const Duration(milliseconds: 500), () {
-      _posts = _getSamplePostsForTab(tabIndex);
+      _posts = getSamplePostsForTab(tabIndex);
       _isLoading = false;
       notifyListeners();
     });
   }
 
   void _loadSampleData() {
-    _posts = _getSamplePostsForTab(0);
+    _posts = getSamplePostsForTab(0);
   }
 
-  List<Post> _getSamplePostsForTab(int tabIndex) {
+  List<Post> getSamplePostsForTab(int tabIndex) {
     // Sample data that changes based on tab
     final basePosts = [
       Post(
@@ -170,34 +161,100 @@ class FeedViewModel extends ChangeNotifier {
         tags: ['Architecture', 'Sustainability'],
         aspectRatio: 3 / 4,
       ),
+      Post(
+        id: '7',
+        title: 'Cooking Tutorial: Pasta',
+        description:
+            'Learn how to make perfect pasta from scratch with simple ingredients.',
+        imageUrl:
+            'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=400',
+        videoUrl: 'cooking_tutorial.mp4',
+        type: PostType.video,
+        author: 'Chef Maria',
+        timeAgo: '3h ago',
+        likes: 342,
+        comments: 28,
+        isLiked: false,
+        isSaved: true,
+        tags: ['Cooking', 'Tutorial', 'Food'],
+        aspectRatio: 16 / 9,
+      ),
+      Post(
+        id: '8',
+        title: 'Workout Routine',
+        description: '15-minute morning workout to boost your energy levels.',
+        imageUrl:
+            'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400',
+        videoUrl: 'workout_routine.mp4',
+        type: PostType.video,
+        author: 'Fitness Coach',
+        timeAgo: '5h ago',
+        likes: 198,
+        comments: 15,
+        isLiked: true,
+        isSaved: false,
+        tags: ['Fitness', 'Health', 'Morning'],
+        aspectRatio: 9 / 16,
+      ),
+      Post(
+        id: '9',
+        title: 'Travel Vlog: Japan',
+        description:
+            'Exploring the beautiful temples and modern cities of Japan.',
+        imageUrl:
+            'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400',
+        videoUrl: 'travel_japan.mp4',
+        type: PostType.video,
+        author: 'Travel Explorer',
+        timeAgo: '8h ago',
+        likes: 567,
+        comments: 45,
+        isLiked: false,
+        isSaved: true,
+        tags: ['Travel', 'Japan', 'Culture'],
+        aspectRatio: 16 / 9,
+      ),
+      Post(
+        id: '10',
+        title: 'Music Production Tips',
+        description: 'Learn the basics of beat making and music production.',
+        imageUrl:
+            'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400',
+        videoUrl: 'music_production.mp4',
+        type: PostType.video,
+        author: 'Beat Maker',
+        timeAgo: '12h ago',
+        likes: 276,
+        comments: 22,
+        isLiked: true,
+        isSaved: true,
+        tags: ['Music', 'Production', 'Tutorial'],
+        aspectRatio: 4 / 3,
+      ),
     ];
 
-    // Modify posts based on tab
-    return basePosts.map((post) {
-      switch (tabIndex) {
-        case 1: // Web design
-          return post.copyWith(
-            title: post.title.replaceAll('Living Room', 'Web Interface'),
-            tags: ['Web Design', 'UI/UX', 'Frontend'],
-          );
-        case 2: // Life hacks
-          return post.copyWith(
-            title: 'Life Hack: ${post.title}',
-            tags: ['Life Hacks', 'Tips', 'Productivity'],
-          );
-        case 3: // Book
-          return post.copyWith(
-            title: 'Book Review: ${post.title}',
-            tags: ['Books', 'Reading', 'Literature'],
-          );
-        case 4: // Technology
-          return post.copyWith(
-            title: 'Tech: ${post.title}',
-            tags: ['Technology', 'Innovation', 'Future'],
-          );
-        default:
-          return post;
-      }
-    }).toList();
+    // Filter posts based on tab
+    switch (tabIndex) {
+      case 0: // Images tab
+        return basePosts
+            .where(
+              (post) =>
+                  post.type == PostType.image ||
+                  post.type == PostType.banking ||
+                  post.type == PostType.text,
+            )
+            .toList();
+      case 1: // Videos tab
+        return basePosts.where((post) => post.type == PostType.video).toList();
+      default:
+        return basePosts
+            .where(
+              (post) =>
+                  post.type == PostType.image ||
+                  post.type == PostType.banking ||
+                  post.type == PostType.text,
+            )
+            .toList();
+    }
   }
 }
