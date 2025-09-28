@@ -15,12 +15,37 @@ class AppRouter {
       GoRoute(
         path: home,
         name: 'home',
-        builder: (context, state) => const FeedScreen(),
+        pageBuilder: (context, state) {
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: const FeedScreen(),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+                  // Fade transition for home
+                  return FadeTransition(opacity: animation, child: child);
+                },
+          );
+        },
       ),
       GoRoute(
         path: saved,
         name: 'saved',
-        builder: (context, state) => const SavedScreen(),
+        pageBuilder: (context, state) {
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: const SavedScreen(),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+                  // Fade transition for saved screen
+                  return FadeTransition(
+                    opacity: CurveTween(
+                      curve: Curves.easeInOutCirc,
+                    ).animate(animation),
+                    child: child,
+                  );
+                },
+          );
+        },
       ),
       GoRoute(
         path: settings,

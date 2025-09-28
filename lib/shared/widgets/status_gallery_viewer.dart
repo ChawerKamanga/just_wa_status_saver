@@ -4,7 +4,6 @@ import 'package:video_player/video_player.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
-
 import '../../core/constants/app_dimensions.dart';
 import '../../core/constants/app_text_styles.dart';
 import '../../data/models/whatsapp_status.dart';
@@ -267,18 +266,22 @@ class _StatusGalleryViewerState extends State<StatusGalleryViewer> {
         return;
       }
 
-      // Get the downloads directory
+      // Get the downloads directory with custom folder
       Directory? downloadsDirectory;
       if (Platform.isAndroid) {
-        // Save directly to Downloads folder (visible to user)
-        downloadsDirectory = Directory('/storage/emulated/0/Download');
+        // Save to custom folder in Downloads (easily accessible)
+        downloadsDirectory = Directory(
+          '/storage/emulated/0/Download/juststatus_saver',
+        );
       } else {
         // For iOS, use Documents directory
         final appDir = await getApplicationDocumentsDirectory();
-        downloadsDirectory = Directory('${appDir.path}/Downloads');
+        downloadsDirectory = Directory(
+          '${appDir.path}/Downloads/juststatus_saver',
+        );
       }
 
-      // Ensure directory exists (Downloads folder should already exist on Android)
+      // Ensure directory exists
       if (!await downloadsDirectory.exists()) {
         await downloadsDirectory.create(recursive: true);
       }
@@ -298,7 +301,7 @@ class _StatusGalleryViewerState extends State<StatusGalleryViewer> {
       await sourceFile.copy(destinationPath);
 
       _showSnackBar(
-        'Downloaded to Downloads folder as $fileName',
+        'Downloaded to Downloads/juststatus_saver as $fileName',
         Colors.green,
       );
     } catch (e) {
