@@ -5,13 +5,11 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_text_styles.dart';
-import '../../../../data/models/post.dart';
+import '../../../../data/models/whatsapp_status.dart';
 import '../../../../shared/widgets/app_scaffold.dart';
-import '../viewmodels/feed_view_model.dart';
-import '../widgets/banking_post_card.dart';
-import '../widgets/image_post_card.dart';
-import '../widgets/text_post_card.dart';
-import '../widgets/video_post_card.dart';
+
+import '../viewmodels/whatsapp_status_view_model.dart';
+import '../widgets/whatsapp_status_card.dart';
 
 class FeedScreen extends StatelessWidget {
   const FeedScreen({super.key});
@@ -19,7 +17,7 @@ class FeedScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => FeedViewModel(),
+      create: (_) => WhatsAppStatusViewModel(),
       child: const _FeedScreenContent(),
     );
   }
@@ -42,7 +40,10 @@ class _FeedScreenContentState extends State<_FeedScreenContent>
     _tabController = TabController(length: 2, vsync: this);
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging) {
-        final viewModel = Provider.of<FeedViewModel>(context, listen: false);
+        final viewModel = Provider.of<WhatsAppStatusViewModel>(
+          context,
+          listen: false,
+        );
         viewModel.selectTab(_tabController.index);
       }
     });
@@ -105,21 +106,36 @@ class _FeedScreenContentState extends State<_FeedScreenContent>
   }
 
   Widget _buildTabContent(int tabIndex) {
-    return Consumer<FeedViewModel>(
+    return Consumer<WhatsAppStatusViewModel>(
       builder: (context, viewModel, _) {
-        // Get posts for the specific tab
-        final posts = viewModel.getSamplePostsForTab(tabIndex);
+        // Check permission first
+        if (!viewModel.hasPermission) {
+          return _buildPermissionRequiredScreen(context, viewModel);
+        }
 
+        // Show loading
         if (viewModel.isLoading) {
           return const Center(
             child: CircularProgressIndicator(color: AppColors.primary),
           );
         }
 
+        // Show error if any
+        if (viewModel.errorMessage != null) {
+          return _buildErrorScreen(context, viewModel);
+        }
+
+        // Get statuses for the specific tab
+        final statuses = viewModel.getStatusesForTab(tabIndex);
+
+        // Show empty state if no statuses
+        if (statuses.isEmpty) {
+          return _buildEmptyState(context, tabIndex);
+        }
+
         return RefreshIndicator(
           onRefresh: () async {
-            await Future.delayed(const Duration(seconds: 1));
-            viewModel.selectTab(tabIndex);
+            await viewModel.refreshStatuses();
           },
           child: Padding(
             padding: const EdgeInsets.all(AppDimensions.spacing16),
@@ -127,10 +143,14 @@ class _FeedScreenContentState extends State<_FeedScreenContent>
               crossAxisCount: 2,
               crossAxisSpacing: AppDimensions.gridSpacing,
               mainAxisSpacing: AppDimensions.gridSpacing,
-              itemCount: posts.length,
+              itemCount: statuses.length,
               itemBuilder: (context, index) {
-                final post = posts[index];
-                return _buildPostCard(context, post, viewModel);
+                final status = statuses[index];
+                return WhatsAppStatusCard(
+                  status: status,
+                  onTap: () => _onStatusTap(context, status),
+                  onSave: () => _onSaveStatus(context, status, viewModel),
+                );
               },
             ),
           ),
@@ -139,154 +159,159 @@ class _FeedScreenContentState extends State<_FeedScreenContent>
     );
   }
 
-  Widget _buildPostCard(
+  Widget _buildPermissionRequiredScreen(
     BuildContext context,
-    Post post,
-    FeedViewModel viewModel,
+    WhatsAppStatusViewModel viewModel,
   ) {
-    switch (post.type) {
-      case PostType.banking:
-        return BankingPostCard(
-          post: post,
-          onTap: () => _onPostTap(context, post),
-        );
-      case PostType.image:
-        return ImagePostCard(
-          post: post,
-          onTap: () => _onPostTap(context, post),
-        );
-      case PostType.video:
-        return VideoPostCard(
-          post: post,
-          onTap: () => _onPostTap(context, post),
-        );
-      case PostType.text:
-        return TextPostCard(post: post, onTap: () => _onPostTap(context, post));
-    }
-  }
-
-  void _onPostTap(BuildContext context, Post post) {
-    // Handle post tap - could navigate to detail screen
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => _PostDetailBottomSheet(post: post),
-    );
-  }
-}
-
-class _PostDetailBottomSheet extends StatelessWidget {
-  final Post post;
-
-  const _PostDetailBottomSheet({required this.post});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.7,
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(AppDimensions.radiusXL),
-          topRight: Radius.circular(AppDimensions.radiusXL),
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppDimensions.spacing24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.folder_off, size: 80, color: Colors.grey[400]),
+            const SizedBox(height: AppDimensions.spacing16),
+            Text(
+              'Permission Required',
+              style: AppTextStyles.headlineSmall,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppDimensions.spacing8),
+            Text(
+              'We need storage permission to access WhatsApp status files.',
+              style: AppTextStyles.bodyMedium,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppDimensions.spacing24),
+            ElevatedButton(
+              onPressed: () => viewModel.requestPermission(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppDimensions.spacing24,
+                  vertical: AppDimensions.spacing12,
+                ),
+              ),
+              child: const Text('Grant Permission'),
+            ),
+          ],
         ),
       ),
-      child: Column(
-        children: [
-          // Handle bar
-          Container(
-            width: 40,
-            height: 4,
-            margin: const EdgeInsets.only(top: AppDimensions.spacing12),
-            decoration: BoxDecoration(
-              color: AppColors.border,
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
+    );
+  }
 
-          // Header
-          Padding(
-            padding: const EdgeInsets.all(AppDimensions.spacing20),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(post.title, style: AppTextStyles.headlineSmall),
+  Widget _buildErrorScreen(
+    BuildContext context,
+    WhatsAppStatusViewModel viewModel,
+  ) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppDimensions.spacing24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, size: 80, color: Colors.red[400]),
+            const SizedBox(height: AppDimensions.spacing16),
+            Text(
+              'Error',
+              style: AppTextStyles.headlineSmall,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppDimensions.spacing8),
+            Text(
+              viewModel.errorMessage ?? 'An unexpected error occurred.',
+              style: AppTextStyles.bodyMedium,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppDimensions.spacing24),
+            ElevatedButton(
+              onPressed: () => viewModel.refreshStatuses(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppDimensions.spacing24,
+                  vertical: AppDimensions.spacing12,
                 ),
-                IconButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  icon: const Icon(Icons.close),
-                ),
-              ],
-            ),
-          ),
-
-          // Content
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppDimensions.spacing20,
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (post.imageUrl != null)
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(
-                        AppDimensions.radiusLarge,
-                      ),
-                      child: AspectRatio(
-                        aspectRatio: post.aspectRatio,
-                        child: Image.network(
-                          post.imageUrl!,
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                        ),
-                      ),
-                    ),
-
-                  const SizedBox(height: AppDimensions.spacing20),
-
-                  Text('By ${post.author}', style: AppTextStyles.bodySmall),
-
-                  const SizedBox(height: AppDimensions.spacing8),
-
-                  Text(post.timeAgo, style: AppTextStyles.bodySmall),
-
-                  if (post.description != null) ...[
-                    const SizedBox(height: AppDimensions.spacing20),
-                    Text(post.description!, style: AppTextStyles.bodyLarge),
-                  ],
-
-                  const SizedBox(height: AppDimensions.spacing20),
-
-                  // Tags
-                  if (post.tags.isNotEmpty)
-                    Wrap(
-                      spacing: AppDimensions.spacing8,
-                      runSpacing: AppDimensions.spacing8,
-                      children: post.tags.map((tag) {
-                        return Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppDimensions.spacing12,
-                            vertical: AppDimensions.spacing8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.surfaceVariant,
-                            borderRadius: BorderRadius.circular(
-                              AppDimensions.radiusMedium,
-                            ),
-                          ),
-                          child: Text(tag, style: AppTextStyles.labelMedium),
-                        );
-                      }).toList(),
-                    ),
-                ],
-              ),
+              child: const Text('Retry'),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
+  }
+
+  Widget _buildEmptyState(BuildContext context, int tabIndex) {
+    final isImageTab = tabIndex == 0;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppDimensions.spacing24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              isImageTab ? Icons.image_outlined : Icons.video_library_outlined,
+              size: 80,
+              color: Colors.grey[400],
+            ),
+            const SizedBox(height: AppDimensions.spacing16),
+            Text(
+              'No ${isImageTab ? 'Images' : 'Videos'} Found',
+              style: AppTextStyles.headlineSmall,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppDimensions.spacing8),
+            Text(
+              'No WhatsApp status ${isImageTab ? 'images' : 'videos'} available.',
+              style: AppTextStyles.bodyMedium,
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _onStatusTap(BuildContext context, WhatsAppStatus status) {
+    // Navigate to full screen view or show details
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Opened ${status.type == StatusType.video ? 'video' : 'image'} status',
+        ),
+        backgroundColor: AppColors.primary,
+      ),
+    );
+  }
+
+  void _onSaveStatus(
+    BuildContext context,
+    WhatsAppStatus status,
+    WhatsAppStatusViewModel viewModel,
+  ) async {
+    try {
+      await viewModel.saveStatus(status);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '${status.type == StatusType.video ? 'Video' : 'Image'} saved successfully!',
+            ),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to save: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 }
