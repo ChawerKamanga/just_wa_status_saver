@@ -15,7 +15,7 @@ class BottomNavBar extends StatelessWidget {
         context.go(AppRouter.home); // Status page
         break;
       case 1:
-        context.go(AppRouter.saved); // Saved page
+        context.push(AppRouter.saved); // Saved page
         break;
     }
   }
