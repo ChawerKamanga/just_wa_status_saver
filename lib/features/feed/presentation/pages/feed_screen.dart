@@ -100,7 +100,7 @@ class _FeedScreenContentState extends State<_FeedScreenContent>
               color: theme.colorScheme.onSurface,
             ),
             onPressed: () {
-              context.go('/settings');
+              context.push('/settings');
             },
           ),
           const SizedBox(width: AppDimensions.spacing8),
