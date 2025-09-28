@@ -250,7 +250,7 @@ class SettingsScreen extends StatelessWidget {
           ),
           const SizedBox(height: AppDimensions.spacing8),
           Text(
-            'Chawanangwa',
+            'Malawian 🇲🇼 Developer',
             style: AppTextStyles.titleLarge.copyWith(
               fontWeight: FontWeight.bold,
               color: AppColors.primary,
@@ -266,7 +266,7 @@ class SettingsScreen extends StatelessWidget {
                 label: 'Facebook',
                 color: const Color(0xFF1877F2),
                 onTap: () =>
-                    _launchUrl(context, 'https://facebook.com/chawanangwa'),
+                    _launchUrl(context, 'https://facebook.com/optimumsystemsltd'),
               ),
               const SizedBox(width: AppDimensions.spacing12),
               _buildSocialButton(
@@ -275,7 +275,7 @@ class SettingsScreen extends StatelessWidget {
                 label: 'LinkedIn',
                 color: const Color(0xFF0A66C2),
                 onTap: () =>
-                    _launchUrl(context, 'https://linkedin.com/in/chawanangwa'),
+                    _launchUrl(context, 'https://www.linkedin.com/company/optimum-systems-limited-mw'),
               ),
             ],
           ),
