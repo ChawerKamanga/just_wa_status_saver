@@ -52,6 +52,7 @@ dependencies:
   # Media handling
   video_player: ^2.8.6
   cached_network_image: ^3.3.1
+  share_plus: ^12.0.0
 
 dev_dependencies:
   flutter_test:

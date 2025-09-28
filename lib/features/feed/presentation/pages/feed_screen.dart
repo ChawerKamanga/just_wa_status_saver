@@ -10,6 +10,7 @@ import '../../../../shared/widgets/app_scaffold.dart';
 
 import '../viewmodels/whatsapp_status_view_model.dart';
 import '../widgets/whatsapp_status_card.dart';
+import '../../../../shared/widgets/status_gallery_viewer.dart';
 
 class FeedScreen extends StatelessWidget {
   const FeedScreen({super.key});
@@ -275,13 +276,25 @@ class _FeedScreenContentState extends State<_FeedScreenContent>
   }
 
   void _onStatusTap(BuildContext context, WhatsAppStatus status) {
-    // Navigate to full screen view or show details
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Opened ${status.type == StatusType.video ? 'video' : 'image'} status',
-        ),
-        backgroundColor: AppColors.primary,
+    final viewModel = Provider.of<WhatsAppStatusViewModel>(
+      context,
+      listen: false,
+    );
+    final allStatuses = viewModel.allStatuses;
+    final currentIndex = allStatuses.indexOf(status);
+
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            StatusGalleryViewer(
+              status: status,
+              allStatuses: allStatuses,
+              currentIndex: currentIndex,
+            ),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+        transitionDuration: const Duration(milliseconds: 300),
       ),
     );
   }
