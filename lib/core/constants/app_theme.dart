@@ -122,9 +122,84 @@ class AppTheme {
   static ThemeData darkTheme = ThemeData(
     useMaterial3: true,
     colorScheme: ColorScheme.fromSeed(
-      seedColor: AppColors.primary,
+      seedColor: Colors.white,
       brightness: Brightness.dark,
+      primary: Colors.white,
+      secondary: Colors.white70,
+      surface: const Color(0xFF1E1E1E),
+      background: const Color(0xFF000000),
+      error: AppColors.error,
+      onPrimary: Colors.black,
+      onSecondary: Colors.black,
+      onSurface: Colors.white,
+      onBackground: Colors.white,
+      onError: Colors.black,
     ),
-    // Dark theme customizations can be added here
+
+    scaffoldBackgroundColor: const Color(0xFF000000),
+
+    appBarTheme: const AppBarTheme(
+      backgroundColor: Color(0xFF1E1E1E),
+      foregroundColor: Colors.white,
+      elevation: 0,
+      centerTitle: false,
+      titleTextStyle: TextStyle(
+        color: Colors.white,
+        fontSize: 20,
+        fontWeight: FontWeight.w600,
+      ),
+    ),
+
+    textTheme: TextTheme(
+      headlineLarge: AppTextStyles.headlineLarge.copyWith(color: Colors.white),
+      headlineMedium: AppTextStyles.headlineMedium.copyWith(
+        color: Colors.white,
+      ),
+      headlineSmall: AppTextStyles.headlineSmall.copyWith(color: Colors.white),
+      titleLarge: AppTextStyles.titleLarge.copyWith(color: Colors.white),
+      titleMedium: AppTextStyles.titleMedium.copyWith(color: Colors.white),
+      titleSmall: AppTextStyles.titleSmall.copyWith(color: Colors.white),
+      bodyLarge: AppTextStyles.bodyLarge.copyWith(color: Colors.white70),
+      bodyMedium: AppTextStyles.bodyMedium.copyWith(color: Colors.white70),
+      bodySmall: AppTextStyles.bodySmall.copyWith(color: Colors.white60),
+      labelLarge: AppTextStyles.labelLarge.copyWith(color: Colors.white),
+      labelMedium: AppTextStyles.labelMedium.copyWith(color: Colors.white),
+      labelSmall: AppTextStyles.labelSmall.copyWith(color: Colors.white60),
+    ),
+
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    ),
+
+    cardTheme: const CardThemeData(
+      color: Color(0xFF1E1E1E),
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(16)),
+      ),
+    ),
+
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      backgroundColor: Color(0xFF373631),
+      selectedItemColor: Colors.white,
+      unselectedItemColor: Colors.white60,
+      type: BottomNavigationBarType.fixed,
+      elevation: 8,
+    ),
+
+    iconTheme: const IconThemeData(color: Colors.white, size: 24),
+
+    dividerTheme: const DividerThemeData(
+      color: Color(0xFF333333),
+      thickness: 1,
+      space: 1,
+    ),
   );
 }

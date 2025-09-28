@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_text_styles.dart';
@@ -59,32 +58,34 @@ class _FeedScreenContentState extends State<_FeedScreenContent>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return AppScaffold(
       selectedNavIndex: 0,
       appBar: AppBar(
-        backgroundColor: AppColors.surface,
+        backgroundColor: theme.colorScheme.surface,
         elevation: 0,
         title: Text(
           AppStrings.appName,
           style: AppTextStyles.headlineSmall.copyWith(
             fontWeight: FontWeight.bold,
+            color: theme.colorScheme.onSurface,
           ),
         ),
         actions: [
           Consumer<WhatsAppStatusViewModel>(
             builder: (context, viewModel, _) => IconButton(
               icon: viewModel.isLoading
-                  ? const SizedBox(
+                  ? SizedBox(
                       width: 20,
                       height: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
                         valueColor: AlwaysStoppedAnimation<Color>(
-                          AppColors.primary,
+                          theme.colorScheme.primary,
                         ),
                       ),
                     )
-                  : const Icon(Icons.refresh, color: AppColors.textPrimary),
+                  : Icon(Icons.refresh, color: theme.colorScheme.onSurface),
               onPressed: viewModel.isLoading
                   ? null
                   : () async {
@@ -94,9 +95,9 @@ class _FeedScreenContentState extends State<_FeedScreenContent>
             ),
           ),
           IconButton(
-            icon: const Icon(
+            icon: Icon(
               Icons.settings_outlined,
-              color: AppColors.textPrimary,
+              color: theme.colorScheme.onSurface,
             ),
             onPressed: () {
               context.go('/settings');
@@ -110,9 +111,9 @@ class _FeedScreenContentState extends State<_FeedScreenContent>
             Tab(text: 'Images'),
             Tab(text: 'Videos'),
           ],
-          labelColor: AppColors.primary,
-          unselectedLabelColor: AppColors.textSecondary,
-          indicatorColor: AppColors.primary,
+          labelColor: theme.colorScheme.primary,
+          unselectedLabelColor: theme.colorScheme.onSurfaceVariant,
+          indicatorColor: theme.colorScheme.primary,
           indicatorWeight: 3,
           dividerColor: Colors.transparent,
           labelStyle: AppTextStyles.titleSmall.copyWith(
@@ -141,8 +142,10 @@ class _FeedScreenContentState extends State<_FeedScreenContent>
 
         // Show loading
         if (viewModel.isLoading) {
-          return const Center(
-            child: CircularProgressIndicator(color: AppColors.primary),
+          return Center(
+            child: CircularProgressIndicator(
+              color: Theme.of(context).colorScheme.primary,
+            ),
           );
         }
 
@@ -212,8 +215,8 @@ class _FeedScreenContentState extends State<_FeedScreenContent>
             ElevatedButton(
               onPressed: () => viewModel.requestPermission(),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppDimensions.spacing24,
                   vertical: AppDimensions.spacing12,
@@ -254,8 +257,8 @@ class _FeedScreenContentState extends State<_FeedScreenContent>
             ElevatedButton(
               onPressed: () => viewModel.refreshStatuses(),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppDimensions.spacing24,
                   vertical: AppDimensions.spacing12,

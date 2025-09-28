@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../data/models/whatsapp_status.dart';
@@ -53,15 +52,16 @@ class _WhatsAppStatusCardState extends State<WhatsAppStatusCard> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: widget.onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(AppDimensions.radiusLarge),
           boxShadow: [
             BoxShadow(
-              color: AppColors.cardShadow,
+              color: theme.colorScheme.shadow.withOpacity(0.1),
               blurRadius: AppDimensions.cardBlurRadius,
               spreadRadius: AppDimensions.cardSpreadRadius,
               offset: const Offset(0, 2),
@@ -89,7 +89,9 @@ class _WhatsAppStatusCardState extends State<WhatsAppStatusCard> {
                   // File name
                   Text(
                     widget.status.name,
-                    style: AppTextStyles.titleSmall,
+                    style: AppTextStyles.titleSmall.copyWith(
+                      color: theme.colorScheme.onSurface,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -104,17 +106,21 @@ class _WhatsAppStatusCardState extends State<WhatsAppStatusCard> {
                             ? Icons.videocam
                             : Icons.image,
                         size: AppDimensions.iconSmall,
-                        color: AppColors.textSecondary,
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
                       const SizedBox(width: AppDimensions.spacing4),
                       Text(
                         widget.status.formattedSize,
-                        style: AppTextStyles.bodySmall,
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
                       ),
                       const Spacer(),
                       Text(
                         widget.status.formattedDate,
-                        style: AppTextStyles.bodySmall,
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
                       ),
                     ],
                   ),
@@ -130,7 +136,7 @@ class _WhatsAppStatusCardState extends State<WhatsAppStatusCard> {
                             ? 'Video'
                             : 'Image',
                         style: AppTextStyles.labelMedium.copyWith(
-                          color: AppColors.primary,
+                          color: theme.colorScheme.primary,
                         ),
                       ),
                       GestureDetector(
@@ -138,15 +144,15 @@ class _WhatsAppStatusCardState extends State<WhatsAppStatusCard> {
                         child: Container(
                           padding: const EdgeInsets.all(AppDimensions.spacing8),
                           decoration: BoxDecoration(
-                            color: AppColors.primary.withOpacity(0.1),
+                            color: theme.colorScheme.primary.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(
                               AppDimensions.radiusSmall,
                             ),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.download,
                             size: AppDimensions.iconSmall,
-                            color: AppColors.primary,
+                            color: theme.colorScheme.primary,
                           ),
                         ),
                       ),
@@ -170,6 +176,7 @@ class _WhatsAppStatusCardState extends State<WhatsAppStatusCard> {
   }
 
   Widget _buildImageWidget() {
+    final theme = Theme.of(context);
     return AspectRatio(
       aspectRatio: 1.0,
       child: Image.file(
@@ -177,11 +184,11 @@ class _WhatsAppStatusCardState extends State<WhatsAppStatusCard> {
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) {
           return Container(
-            color: AppColors.surfaceVariant,
-            child: const Center(
+            color: theme.colorScheme.surfaceVariant,
+            child: Center(
               child: Icon(
                 Icons.broken_image,
-                color: AppColors.textSecondary,
+                color: theme.colorScheme.onSurfaceVariant,
                 size: 40,
               ),
             ),
@@ -192,6 +199,7 @@ class _WhatsAppStatusCardState extends State<WhatsAppStatusCard> {
   }
 
   Widget _buildVideoWidget() {
+    final theme = Theme.of(context);
     return AspectRatio(
       aspectRatio: 1.0,
       child: Stack(
@@ -200,9 +208,11 @@ class _WhatsAppStatusCardState extends State<WhatsAppStatusCard> {
             VideoPlayer(_videoController!)
           else
             Container(
-              color: AppColors.textPrimary.withOpacity(0.8),
-              child: const Center(
-                child: CircularProgressIndicator(color: AppColors.surface),
+              color: theme.colorScheme.onSurface.withOpacity(0.8),
+              child: Center(
+                child: CircularProgressIndicator(
+                  color: theme.colorScheme.surface,
+                ),
               ),
             ),
 
@@ -218,10 +228,10 @@ class _WhatsAppStatusCardState extends State<WhatsAppStatusCard> {
           ),
 
           // Play button
-          const Center(
+          Center(
             child: Icon(
               Icons.play_circle_filled,
-              color: AppColors.surface,
+              color: theme.colorScheme.surface,
               size: 50,
             ),
           ),
@@ -245,7 +255,7 @@ class _WhatsAppStatusCardState extends State<WhatsAppStatusCard> {
                 child: Text(
                   _formatDuration(_videoController!.value.duration),
                   style: AppTextStyles.labelSmall.copyWith(
-                    color: AppColors.surface,
+                    color: Theme.of(context).colorScheme.surface,
                   ),
                 ),
               ),

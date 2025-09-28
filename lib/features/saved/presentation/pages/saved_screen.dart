@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:path_provider/path_provider.dart';
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_text_styles.dart';
@@ -98,20 +97,22 @@ class _SavedScreenState extends State<SavedScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return AppScaffold(
       selectedNavIndex: 1,
       appBar: AppBar(
-        backgroundColor: AppColors.surface,
+        backgroundColor: theme.colorScheme.surface,
         elevation: 0,
         title: Text(
           AppStrings.navSaved,
           style: AppTextStyles.headlineSmall.copyWith(
             fontWeight: FontWeight.bold,
+            color: theme.colorScheme.onSurface,
           ),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh, color: AppColors.textPrimary),
+            icon: Icon(Icons.refresh, color: theme.colorScheme.onSurface),
             onPressed: () {
               setState(() {
                 _isLoading = true;
@@ -123,25 +124,34 @@ class _SavedScreenState extends State<SavedScreen> {
         ],
       ),
       body: _isLoading
-          ? const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
+          ? Center(
+              child: CircularProgressIndicator(
+                color: theme.colorScheme.primary,
+              ),
             )
           : _savedFiles.isEmpty
-          ? const Center(
+          ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
                     Icons.folder_open,
                     size: 80,
-                    color: AppColors.textSecondary,
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
-                  SizedBox(height: AppDimensions.spacing16),
-                  Text('No Downloaded Status', style: AppTextStyles.titleLarge),
-                  SizedBox(height: AppDimensions.spacing8),
+                  const SizedBox(height: AppDimensions.spacing16),
+                  Text(
+                    'No Downloaded Status',
+                    style: AppTextStyles.titleLarge.copyWith(
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: AppDimensions.spacing8),
                   Text(
                     'Your downloaded WhatsApp statuses will appear here',
-                    style: AppTextStyles.bodyMedium,
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -157,7 +167,7 @@ class _SavedScreenState extends State<SavedScreen> {
                     Text(
                       '${_savedFiles.length} Downloaded Files',
                       style: AppTextStyles.bodyMedium.copyWith(
-                        color: AppColors.textSecondary,
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
                     const SizedBox(height: AppDimensions.spacing16),

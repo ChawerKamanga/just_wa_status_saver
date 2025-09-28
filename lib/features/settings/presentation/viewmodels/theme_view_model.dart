@@ -7,13 +7,12 @@ class ThemeViewModel extends ChangeNotifier {
 
   ThemeViewModel();
 
-  Future<void> setThemeMode(ThemeMode mode) async {
+  void setThemeMode(ThemeMode mode) {
     if (_themeMode == mode) return;
 
     _themeMode = mode;
     notifyListeners();
 
-    // TODO: Persist theme preference to shared preferences
     debugPrint('Theme changed to: ${mode.name}');
   }
 }

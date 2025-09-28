@@ -11,20 +11,23 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final themeViewModel = Provider.of<ThemeViewModel>(context);
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.colorScheme.background,
       appBar: AppBar(
-        backgroundColor: AppColors.surface,
+        backgroundColor: theme.colorScheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
           onPressed: () => context.go('/'),
         ),
         title: Text(
           'Settings',
           style: AppTextStyles.headlineSmall.copyWith(
             fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
+            color: theme.colorScheme.onSurface,
           ),
         ),
       ),
@@ -34,14 +37,14 @@ class SettingsScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Theme Section
-            _buildSectionHeader('Appearance'),
-            _buildThemeSelector(),
+            _buildSectionHeader(context, 'Appearance'),
+            _buildThemeSelector(context, themeViewModel),
 
             const SizedBox(height: AppDimensions.spacing32),
 
             // About Section
-            _buildSectionHeader('About'),
-            _buildAboutCard(),
+            _buildSectionHeader(context, 'About'),
+            _buildAboutCard(context),
 
             const Spacer(),
           ],
@@ -50,58 +53,58 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionHeader(String title) {
+  Widget _buildSectionHeader(BuildContext context, String title) {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppDimensions.spacing12),
       child: Text(
         title,
         style: AppTextStyles.titleMedium.copyWith(
           fontWeight: FontWeight.w600,
-          color: AppColors.textPrimary,
+          color: Theme.of(context).colorScheme.onSurface,
         ),
       ),
     );
   }
 
-  Widget _buildThemeSelector() {
-    return Consumer<ThemeViewModel>(
-      builder: (context, themeViewModel, _) {
-        return Container(
-          padding: const EdgeInsets.all(AppDimensions.spacing16),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(AppDimensions.radiusLarge),
-            border: Border.all(color: AppColors.border),
+  Widget _buildThemeSelector(
+    BuildContext context,
+    ThemeViewModel themeViewModel,
+  ) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.all(AppDimensions.spacing16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(AppDimensions.radiusLarge),
+        border: Border.all(color: theme.dividerColor),
+      ),
+      child: Column(
+        children: [
+          _buildThemeOption(
+            context,
+            themeViewModel,
+            'Light',
+            Icons.light_mode,
+            ThemeMode.light,
           ),
-          child: Column(
-            children: [
-              _buildThemeOption(
-                context,
-                themeViewModel,
-                'Light',
-                Icons.light_mode,
-                ThemeMode.light,
-              ),
-              const Divider(color: AppColors.border),
-              _buildThemeOption(
-                context,
-                themeViewModel,
-                'Dark',
-                Icons.dark_mode,
-                ThemeMode.dark,
-              ),
-              const Divider(color: AppColors.border),
-              _buildThemeOption(
-                context,
-                themeViewModel,
-                'System',
-                Icons.settings_system_daydream,
-                ThemeMode.system,
-              ),
-            ],
+          const Divider(color: AppColors.border),
+          _buildThemeOption(
+            context,
+            themeViewModel,
+            'Dark',
+            Icons.dark_mode,
+            ThemeMode.dark,
           ),
-        );
-      },
+          const Divider(color: AppColors.border),
+          _buildThemeOption(
+            context,
+            themeViewModel,
+            'System',
+            Icons.settings_system_daydream,
+            ThemeMode.system,
+          ),
+        ],
+      ),
     );
   }
 
@@ -112,6 +115,7 @@ class SettingsScreen extends StatelessWidget {
     IconData icon,
     ThemeMode mode,
   ) {
+    final theme = Theme.of(context);
     final isSelected = themeViewModel.themeMode == mode;
 
     return InkWell(
@@ -123,7 +127,9 @@ class SettingsScreen extends StatelessWidget {
           children: [
             Icon(
               icon,
-              color: isSelected ? AppColors.primary : AppColors.textSecondary,
+              color: isSelected
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.onSurfaceVariant,
               size: 24,
             ),
             const SizedBox(width: AppDimensions.spacing12),
@@ -131,26 +137,33 @@ class SettingsScreen extends StatelessWidget {
               child: Text(
                 title,
                 style: AppTextStyles.bodyLarge.copyWith(
-                  color: isSelected ? AppColors.primary : AppColors.textPrimary,
+                  color: isSelected
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.onSurface,
                   fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
                 ),
               ),
             ),
             if (isSelected)
-              Icon(Icons.check_circle, color: AppColors.primary, size: 20),
+              Icon(
+                Icons.check_circle,
+                color: theme.colorScheme.primary,
+                size: 20,
+              ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildAboutCard() {
+  Widget _buildAboutCard(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(AppDimensions.spacing16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(AppDimensions.radiusLarge),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: theme.dividerColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -161,14 +174,14 @@ class SettingsScreen extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
+                  color: theme.colorScheme.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(
                     AppDimensions.radiusMedium,
                   ),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.android,
-                  color: AppColors.primary,
+                  color: theme.colorScheme.primary,
                   size: 24,
                 ),
               ),
@@ -181,13 +194,13 @@ class SettingsScreen extends StatelessWidget {
                       'WhatsApp Status Saver',
                       style: AppTextStyles.titleMedium.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
+                        color: theme.colorScheme.onSurface,
                       ),
                     ),
                     Text(
                       'Version 1.0.0',
                       style: AppTextStyles.bodySmall.copyWith(
-                        color: AppColors.textSecondary,
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -199,7 +212,7 @@ class SettingsScreen extends StatelessWidget {
           Text(
             'Save and share WhatsApp status images and videos easily. Browse, preview, and download status files directly to your device.',
             style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.textSecondary,
+              color: theme.colorScheme.onSurfaceVariant,
               height: 1.5,
             ),
           ),

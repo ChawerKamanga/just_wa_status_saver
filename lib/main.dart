@@ -6,7 +6,13 @@ import 'core/navigation/app_router.dart';
 import 'features/settings/presentation/viewmodels/theme_view_model.dart';
 
 void main() {
-  runApp(const WaStatusSaverApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => ThemeViewModel(),
+      child: const WaStatusSaverApp(),
+    ),
+  );
 }
 
 class WaStatusSaverApp extends StatelessWidget {
@@ -14,20 +20,17 @@ class WaStatusSaverApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => ThemeViewModel(),
-      child: Consumer<ThemeViewModel>(
-        builder: (context, themeViewModel, _) {
-          return MaterialApp.router(
-            title: AppStrings.appName,
-            theme: AppTheme.lightTheme,
-            darkTheme: AppTheme.darkTheme,
-            themeMode: themeViewModel.themeMode,
-            routerConfig: AppRouter.router,
-            debugShowCheckedModeBanner: false,
-          );
-        },
-      ),
+    return Consumer<ThemeViewModel>(
+      builder: (context, themeViewModel, _) {
+        return MaterialApp.router(
+          title: AppStrings.appName,
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: themeViewModel.themeMode,
+          routerConfig: AppRouter.router,
+          debugShowCheckedModeBanner: false,
+        );
+      },
     );
   }
 }

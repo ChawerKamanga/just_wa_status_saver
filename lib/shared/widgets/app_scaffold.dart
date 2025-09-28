@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../core/constants/app_colors.dart';
 import 'bottom_nav_bar.dart';
 
 class AppScaffold extends StatelessWidget {
@@ -19,7 +18,7 @@ class AppScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).colorScheme.background,
       appBar: appBar,
       body: body,
       bottomNavigationBar: BottomNavBar(selectedIndex: selectedNavIndex),

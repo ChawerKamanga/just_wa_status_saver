@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_dimensions.dart';
+import '../../../../core/constants/app_dimensions.dart'; // Corrected and completed import
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../data/models/post.dart';
 
@@ -10,8 +10,37 @@ class TextPostCard extends StatelessWidget {
 
   const TextPostCard({super.key, required this.post, this.onTap});
 
+  Color _colorFromHex(String hexColor) {
+    final hexCode = hexColor.replaceAll('#', '');
+    if (hexCode.length == 6) {
+      return Color(int.parse('FF$hexCode', radix: 16));
+    }
+    return Color(int.parse(hexCode, radix: 16));
+  }
+
+  Color _getBackgroundColor(ThemeData theme) {
+    if (post.backgroundColor != null) {
+      return _colorFromHex(post.backgroundColor!);
+    }
+
+    // Default gradient colors
+    final colors = [
+      theme.colorScheme.primary,
+      theme.colorScheme.secondary,
+      theme.colorScheme.tertiary,
+      const Color(0xFF8B5A2B), // Brown
+      const Color(0xFF059669), // Green
+      const Color(0xFFDC2626), // Red
+    ];
+
+    return colors[post.id.hashCode % colors.length];
+  }
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final backgroundColor = _getBackgroundColor(theme); // Call with the theme
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -21,14 +50,14 @@ class TextPostCard extends StatelessWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              _getBackgroundColor().withOpacity(0.8),
-              _getBackgroundColor().withOpacity(0.6),
+              backgroundColor.withOpacity(0.8),
+              backgroundColor.withOpacity(0.6),
             ],
           ),
           borderRadius: BorderRadius.circular(AppDimensions.radiusLarge),
           boxShadow: [
             BoxShadow(
-              color: AppColors.cardShadow,
+              color: theme.colorScheme.shadow.withOpacity(0.1),
               blurRadius: AppDimensions.cardBlurRadius,
               spreadRadius: AppDimensions.cardSpreadRadius,
               offset: const Offset(0, 2),
@@ -102,6 +131,9 @@ class TextPostCard extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       GestureDetector(
+                        onTap: () {
+                          /* Handle like */
+                        },
                         child: Icon(
                           post.isLiked ? Icons.favorite : Icons.favorite_border,
                           size: AppDimensions.iconSmall,
@@ -112,6 +144,9 @@ class TextPostCard extends StatelessWidget {
                       ),
                       const SizedBox(width: AppDimensions.spacing8),
                       GestureDetector(
+                        onTap: () {
+                          /* Handle save */
+                        },
                         child: Icon(
                           post.isSaved ? Icons.bookmark : Icons.bookmark_border,
                           size: AppDimensions.iconSmall,
@@ -121,10 +156,15 @@ class TextPostCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: AppDimensions.spacing4),
-                      Icon(
-                        Icons.more_vert,
-                        size: AppDimensions.iconSmall,
-                        color: AppColors.surface.withOpacity(0.8),
+                      GestureDetector(
+                        onTap: () {
+                          /* Handle more options */
+                        },
+                        child: Icon(
+                          Icons.more_vert,
+                          size: AppDimensions.iconSmall,
+                          color: AppColors.surface.withOpacity(0.8),
+                        ),
                       ),
                     ],
                   ),
@@ -135,23 +175,5 @@ class TextPostCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  Color _getBackgroundColor() {
-    if (post.backgroundColor != null) {
-      return Color(int.parse(post.backgroundColor!.replaceFirst('#', '0xFF')));
-    }
-
-    // Default gradient colors
-    final colors = [
-      AppColors.primary,
-      AppColors.secondary,
-      AppColors.accent,
-      const Color(0xFF8B5A2B), // Brown
-      const Color(0xFF059669), // Green
-      const Color(0xFFDC2626), // Red
-    ];
-
-    return colors[post.id.hashCode % colors.length];
   }
 }

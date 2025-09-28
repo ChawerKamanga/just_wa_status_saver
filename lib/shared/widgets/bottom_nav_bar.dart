@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_dimensions.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/navigation/app_router.dart';
@@ -23,12 +22,15 @@ class BottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: isDarkMode ? const Color(0xFF373631) : theme.colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: AppColors.cardShadow,
+            color: theme.colorScheme.shadow.withOpacity(0.1),
             blurRadius: AppDimensions.cardBlurRadius,
             offset: const Offset(0, -2),
           ),
@@ -71,6 +73,8 @@ class BottomNavBar extends StatelessWidget {
     int index,
     String label,
   ) {
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
     final isSelected = selectedIndex == index;
 
     return GestureDetector(
@@ -85,7 +89,11 @@ class BottomNavBar extends StatelessWidget {
           children: [
             Icon(
               isSelected ? filledIcon : outlineIcon,
-              color: isSelected ? AppColors.primary : AppColors.textSecondary,
+              color: isSelected
+                  ? (isDarkMode ? Colors.white : theme.colorScheme.primary)
+                  : (isDarkMode
+                        ? Colors.white70
+                        : theme.colorScheme.onSurfaceVariant),
               size: AppDimensions.iconMedium,
             ),
             const SizedBox(height: AppDimensions.spacing4),
@@ -93,7 +101,11 @@ class BottomNavBar extends StatelessWidget {
               label,
               style: TextStyle(
                 fontSize: 12,
-                color: isSelected ? AppColors.primary : AppColors.textSecondary,
+                color: isSelected
+                    ? (isDarkMode ? Colors.white : theme.colorScheme.primary)
+                    : (isDarkMode
+                          ? Colors.white70
+                          : theme.colorScheme.onSurfaceVariant),
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
               ),
             ),

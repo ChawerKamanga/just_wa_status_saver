@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../data/models/post.dart';
@@ -12,15 +11,16 @@ class ImagePostCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(AppDimensions.radiusLarge),
           boxShadow: [
             BoxShadow(
-              color: AppColors.cardShadow,
+              color: theme.colorScheme.shadow.withOpacity(0.1),
               blurRadius: AppDimensions.cardBlurRadius,
               spreadRadius: AppDimensions.cardSpreadRadius,
               offset: const Offset(0, 2),
@@ -50,16 +50,16 @@ class ImagePostCard extends StatelessWidget {
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                                 colors: [
-                                  AppColors.primary.withOpacity(0.3),
-                                  AppColors.secondary.withOpacity(0.3),
+                                  theme.colorScheme.primary.withOpacity(0.3),
+                                  theme.colorScheme.secondary.withOpacity(0.3),
                                 ],
                               ),
                             ),
-                            child: const Center(
+                            child: Center(
                               child: Icon(
                                 Icons.image,
                                 size: 48,
-                                color: AppColors.textSecondary,
+                                color: theme.colorScheme.onSurfaceVariant,
                               ),
                             ),
                           );
@@ -71,16 +71,16 @@ class ImagePostCard extends StatelessWidget {
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                             colors: [
-                              AppColors.primary.withOpacity(0.3),
-                              AppColors.secondary.withOpacity(0.3),
+                              theme.colorScheme.primary.withOpacity(0.3),
+                              theme.colorScheme.secondary.withOpacity(0.3),
                             ],
                           ),
                         ),
-                        child: const Center(
+                        child: Center(
                           child: Icon(
                             Icons.image,
                             size: 48,
-                            color: AppColors.surface,
+                            color: theme.colorScheme.surface,
                           ),
                         ),
                       ),
@@ -95,7 +95,9 @@ class ImagePostCard extends StatelessWidget {
                 children: [
                   Text(
                     post.title,
-                    style: AppTextStyles.titleMedium,
+                    style: AppTextStyles.titleMedium.copyWith(
+                      color: theme.colorScheme.onSurface,
+                    ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -104,7 +106,9 @@ class ImagePostCard extends StatelessWidget {
                     const SizedBox(height: AppDimensions.spacing8),
                     Text(
                       post.description!,
-                      style: AppTextStyles.bodySmall,
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -124,12 +128,17 @@ class ImagePostCard extends StatelessWidget {
                             vertical: AppDimensions.spacing4,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.surfaceVariant,
+                            color: theme.colorScheme.surfaceVariant,
                             borderRadius: BorderRadius.circular(
                               AppDimensions.radiusSmall,
                             ),
                           ),
-                          child: Text(tag, style: AppTextStyles.labelSmall),
+                          child: Text(
+                            tag,
+                            style: AppTextStyles.labelSmall.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
                         );
                       }).toList(),
                     ),
@@ -146,14 +155,26 @@ class ImagePostCard extends StatelessWidget {
                             Flexible(
                               child: Text(
                                 post.author,
-                                style: AppTextStyles.bodySmall,
+                                style: AppTextStyles.bodySmall.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
                             const SizedBox(width: AppDimensions.spacing8),
-                            Text('•', style: AppTextStyles.bodySmall),
+                            Text(
+                              '•',
+                              style: AppTextStyles.bodySmall.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
                             const SizedBox(width: AppDimensions.spacing8),
-                            Text(post.timeAgo, style: AppTextStyles.bodySmall),
+                            Text(
+                              post.timeAgo,
+                              style: AppTextStyles.bodySmall.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -167,8 +188,8 @@ class ImagePostCard extends StatelessWidget {
                                   : Icons.favorite_border,
                               size: AppDimensions.iconSmall,
                               color: post.isLiked
-                                  ? AppColors.error
-                                  : AppColors.textSecondary,
+                                  ? theme.colorScheme.error
+                                  : theme.colorScheme.onSurfaceVariant,
                             ),
                           ),
                           const SizedBox(width: AppDimensions.spacing8),
@@ -179,15 +200,15 @@ class ImagePostCard extends StatelessWidget {
                                   : Icons.bookmark_border,
                               size: AppDimensions.iconSmall,
                               color: post.isSaved
-                                  ? AppColors.primary
-                                  : AppColors.textSecondary,
+                                  ? theme.colorScheme.primary
+                                  : theme.colorScheme.onSurfaceVariant,
                             ),
                           ),
                           const SizedBox(width: AppDimensions.spacing4),
-                          const Icon(
+                          Icon(
                             Icons.more_vert,
                             size: AppDimensions.iconSmall,
-                            color: AppColors.textSecondary,
+                            color: theme.colorScheme.onSurfaceVariant,
                           ),
                         ],
                       ),

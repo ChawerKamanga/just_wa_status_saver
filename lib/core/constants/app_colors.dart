@@ -24,4 +24,12 @@ class AppColors {
   static const Color tabInactive = textSecondary;
 
   static const Color cardShadow = Color(0x0D000000);
+
+  // Dark theme colors
+  static const Color darkBackground = Color(0xFF121212);
+  static const Color darkSurface = Color(0xFF1E1E1E);
+  static const Color darkSurfaceVariant = Color(0xFF2C2C2C);
+  static const Color darkTextPrimary = Color(0xFFFFFFFF);
+  static const Color darkTextSecondary = Color(0xFFB3B3B3);
+  static const Color darkBorder = Color(0xFF333333);
 }
