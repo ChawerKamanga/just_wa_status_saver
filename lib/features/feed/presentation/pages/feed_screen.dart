@@ -202,13 +202,17 @@ class _FeedScreenContentState extends State<_FeedScreenContent>
             const SizedBox(height: AppDimensions.spacing16),
             Text(
               'Permission Required',
-              style: AppTextStyles.headlineSmall,
+              style: AppTextStyles.headlineSmall.copyWith(
+                color: Theme.of(context).colorScheme.onBackground,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppDimensions.spacing8),
             Text(
               'We need storage permission to access WhatsApp status files.',
-              style: AppTextStyles.bodyMedium,
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: Theme.of(context).colorScheme.onBackground,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppDimensions.spacing24),
