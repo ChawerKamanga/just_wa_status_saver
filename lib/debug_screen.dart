@@ -10,7 +10,7 @@ class DebugScreen extends StatefulWidget {
 }
 
 class _DebugScreenState extends State<DebugScreen> {
-  List<String> _debugLogs = [];
+  final List<String> _debugLogs = [];
 
   void _addLog(String message) {
     setState(() {

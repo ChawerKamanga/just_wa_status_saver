@@ -128,7 +128,7 @@ class ImagePostCard extends StatelessWidget {
                             vertical: AppDimensions.spacing4,
                           ),
                           decoration: BoxDecoration(
-                            color: theme.colorScheme.surfaceVariant,
+                            color: theme.colorScheme.surfaceContainerHighest,
                             borderRadius: BorderRadius.circular(
                               AppDimensions.radiusSmall,
                             ),

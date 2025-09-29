@@ -18,7 +18,7 @@ class AppScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: appBar,
       body: body,
       bottomNavigationBar: BottomNavBar(selectedIndex: selectedNavIndex),

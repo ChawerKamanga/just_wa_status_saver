@@ -184,7 +184,7 @@ class _WhatsAppStatusCardState extends State<WhatsAppStatusCard> {
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) {
           return Container(
-            color: theme.colorScheme.surfaceVariant,
+            color: theme.colorScheme.surfaceContainerHighest,
             child: Center(
               child: Icon(
                 Icons.broken_image,

@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../../data/models/post.dart';
-import '../../../../data/models/whatsapp_status.dart';
-import '../../../../core/services/whatsapp_status_service.dart';
-import '../../../../core/services/permission_service.dart';
 
 class FeedViewModel extends ChangeNotifier {
   int _selectedTabIndex = 0;

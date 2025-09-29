@@ -15,7 +15,7 @@ class SettingsScreen extends StatelessWidget {
     final themeViewModel = Provider.of<ThemeViewModel>(context);
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.background,
+      backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
         backgroundColor: theme.colorScheme.surface,
         elevation: 0,
